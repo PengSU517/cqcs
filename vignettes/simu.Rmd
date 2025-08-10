@@ -49,11 +49,11 @@ mtds  =  list(
 
 ```{r}
 lngth = function(order) {
-  max(which(order == 1), which(order == 2), which(order == 3), which(order == 4), which(order == 5))
+  max(which(order == 1),  which(order == 3),  which(order == 5))
 }
 
 tpn = function(y) {
-  1 %in% y + 2 %in% y + 3 %in% y + 4 %in% y + 5 %in% y
+  1 %in% y +  3 %in% y +  5 %in% y
 }
 ```
 
@@ -62,7 +62,7 @@ tpn = function(y) {
 # 定义参数
 ms = 1:2
 ns = c(100, 200)
-ps  =  c(2000)
+ps  =  c(100, 200, 500)
 heters = c(0, 1)
 taus = c(0.25, 0.5, 0.75)
 distris = c("normal", "cauchy")
@@ -71,13 +71,13 @@ distris = c("normal", "cauchy")
 
 ```{r}
 # 定义参数
-# m = 1
-# n = 100
-# p  =  100
-# heter = 0
-# tau = 0.5
-# distri = 1
-# method = 1
+m = 1
+n = 100
+p  =  2000
+heter = 0
+tau = 0.5
+distri = 1
+method = 1
 
 ```
 
@@ -133,6 +133,9 @@ write.csv(datmat_foreach, file  =  "result.csv", row.names  =  FALSE)
 
 ```
 
+```{r}
+
+```
 
 
 
