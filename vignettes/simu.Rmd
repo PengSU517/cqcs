@@ -1,0 +1,138 @@
+---
+title: "simu"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteIndexEntry{simu}
+ %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteEncoding{UTF-8}
+---
+
+```{r, include  =  FALSE}
+knitr::opts_chunk$set(
+ collapse  =  TRUE, 
+ comment  =  "#>"
+)
+```
+
+```{r setup}
+library("cqcs")
+library("doParallel")
+```
+
+
+```{r}
+library("cqcs")
+library("doParallel")
+# 设置并行计算核心数
+# `detectCores()` 会自动检测你的CPU核心数
+num_cores = detectCores() - 4 
+registerDoParallel(num_cores)
+```
+
+
+```{r}
+mtds  =  list(
+  #censored quantile correlation screening
+  cqcs  =  function(y, d, x, tau, len  =  NULL) {
+    return(cqcs(y, d, x, tau, len))
+  },
+  #all observations quantile correlation screening
+  aocqs  =  function(y, d, x, tau, len  =  NULL) {
+    return(qcs(y, x, tau, len))
+  },
+  #completed observation based correlation screening
+  cocqs  =  function(y, d, x, tau, len  =  NULL) {
+    return(coqcs(y, d, x, tau, len))
+  }
+)
+```
+
+```{r}
+lngth = function(order) {
+  max(which(order == 1), which(order == 2), which(order == 3), which(order == 4), which(order == 5))
+}
+
+tpn = function(y) {
+  1 %in% y + 2 %in% y + 3 %in% y + 4 %in% y + 5 %in% y
+}
+```
+
+
+```{r}
+# 定义参数
+ms = 1:2
+ns = c(100, 200)
+ps  =  c(2000)
+heters = c(0, 1)
+taus = c(0.25, 0.5, 0.75)
+distris = c("normal", "cauchy")
+
+```
+
+```{r}
+# 定义参数
+# m = 1
+# n = 100
+# p  =  100
+# heter = 0
+# tau = 0.5
+# distri = 1
+# method = 1
+
+```
+
+
+```{r}
+foreach = foreach::foreach
+datmat_foreach = foreach(m  =  ms,
+                         .combine  =  "rbind",
+                         .packages  =  c("MASS", "cqcs")) %:%
+  foreach(n  =  ns, .combine  =  "rbind") %:%
+  foreach(p  =  ps, .combine  =  "rbind") %:%
+  foreach(heter  =  heters, .combine  =  "rbind") %:%
+  foreach(tau  =  taus, .combine  =  "rbind") %:%
+  foreach(distri  =  seq_along(distris), .combine  =  "rbind") %:%
+  foreach(method  =  seq_along(mtds), .combine  =  "rbind") %dopar% {
+    ## generate datasets
+    set.seed(m)
+    dat = cqcs::datagen(
+      n = n,
+      p = p,
+      tau = tau,
+      distri = distris[distri],
+      heter = heter
+    )
+    y = dat$y
+    d = dat$d
+    x = dat$x
+    
+    ##orders
+    orders  =  mtds[[method]](y, d, x, tau, p)
+    len  =  lngth(orders)
+    ## true positive
+    orderlogn = orders[1:floor(n / log(n))]
+    tp = tpn(orderlogn)
+    ## return
+    rst = list(
+      m = m,
+      n = n,
+      p = p,
+      heter = heter,
+      tau = tau,
+      distri = distris[distri],
+      method = names(mtds)[method],
+      rate = dat$rate,
+      length = len,
+      tp = tp
+    )
+  }
+
+# 关闭并行集群
+stopImplicitCluster()
+write.csv(datmat_foreach, file  =  "result.csv", row.names  =  FALSE)
+
+```
+
+
+
+
