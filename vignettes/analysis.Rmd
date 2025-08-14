@@ -1,8 +1,8 @@
 ---
-title: "simu"
+title: "analysis"
 output: rmarkdown::html_vignette
 vignette: >
- %\VignetteIndexEntry{simu}
+ %\VignetteIndexEntry{analysis}
  %\VignetteEngine{knitr::rmarkdown}
  %\VignetteEncoding{UTF-8}
 ---
@@ -10,6 +10,9 @@ vignette: >
 ```{r, include  =  FALSE}
 knitr::opts_chunk$set(
  collapse  =  TRUE, 
+ messages  =  FALSE,
+ warnings  =  FALSE,
+ eval  = FALSE,
  comment  =  "#>"
 )
 ```
