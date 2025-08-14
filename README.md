@@ -11,13 +11,22 @@ There are two key functions in the package.
 function `cqcor` is used to caculate the CQC between two variables, which can be used to screen the variables.
 
 ```{r}
-cqcor(y, d, x, tau) # y: response variable, d: censoring indicator, x: covariate, tau: quantile level
+cqcor(y, d, x, tau) 
+# y: response variable, 
+# d: censoring indicator, 
+# x: covariate, 
+# tau: quantile level
 ```
 
 function `cqcs` is used to screen the variables based on CQC.
 
 ```{r}
-cqcs(y, d, x, tau = 0.5, len = 100) # y: response variable, d: censoring indicator, x: covariates, tau: quantile level, len: screening length
+cqcs(y, d, x, tau = 0.5, len = 100) 
+# y: response variable, 
+# d: censoring indicator, 
+# x: covariates, 
+# tau: quantile level, 
+# len: screening length
 ```
 
 
