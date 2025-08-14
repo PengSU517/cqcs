@@ -23,8 +23,6 @@ library("doParallel")
 ```{r}
 library("cqcs")
 library("doParallel")
-# 设置并行计算核心数
-# `detectCores()` 会自动检测你的CPU核心数
 num_cores = detectCores() - 4 
 registerDoParallel(num_cores)
 ```
@@ -59,8 +57,8 @@ tpn = function(y) {
 
 
 ```{r}
-# 定义参数
-ms = 1:2
+# define  parameter sets
+ms = 1:200
 ns = c(100, 200)
 ps  =  c(100, 200, 500)
 heters = c(0, 1)
@@ -70,7 +68,6 @@ distris = c("normal", "cauchy")
 ```
 
 ```{r}
-# 定义参数
 m = 1
 n = 100
 p  =  2000
@@ -127,15 +124,12 @@ datmat_foreach = foreach(m  =  ms,
     )
   }
 
-# 关闭并行集群
 stopImplicitCluster()
 write.csv(datmat_foreach, file  =  "result.csv", row.names  =  FALSE)
 
 ```
 
-```{r}
 
-```
 
 
 

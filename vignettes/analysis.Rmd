@@ -1,0 +1,135 @@
+---
+title: "simu"
+output: rmarkdown::html_vignette
+vignette: >
+ %\VignetteIndexEntry{simu}
+ %\VignetteEngine{knitr::rmarkdown}
+ %\VignetteEncoding{UTF-8}
+---
+
+```{r, include  =  FALSE}
+knitr::opts_chunk$set(
+ collapse  =  TRUE, 
+ comment  =  "#>"
+)
+```
+
+```{r setup}
+library("tidyverse")
+library(dplyr)
+library(tidyr)
+library(readr)
+library(kableExtra)
+```
+
+
+```{r}
+
+result = readr::read_csv("result.csv")
+
+result = result %>%
+  mutate(
+    method = case_when(
+    method == "cqcs" ~ "CQCS",
+    method == "aocqs" ~ "AOCQS",
+    method == "cocqs" ~ "COQCS"
+  ), 
+  distribution = case_when(
+    distri == "normal" ~ "Normal",
+    distri == "cauchy" ~ "Cauchy"
+  ),
+  heterogeneity = case_when(
+    heter == 0 ~ "No heterogeneity",
+    heter == 1 ~ "With heterogeneity"
+  ),
+  method = factor(method, levels = c("COQCS", "AOCQS", "CQCS")),
+  distribution = factor(distribution, levels = c("Normal", "Cauchy")),
+  heterogeneity = factor(heterogeneity, levels = c("No heterogeneity", "With heterogeneity"))
+  )
+```
+
+
+```{r}
+summ = result %>%
+  group_by(heterogeneity, distribution, n, p, tau, method) %>%
+  summarise(
+    Length = mean(length, na.rm = TRUE),
+    TP = mean(tp, na.rm = TRUE),
+    .groups = 'drop'
+  )
+```
+
+
+```{r}
+pivot_summ <- summ %>%
+  pivot_wider(
+    names_from = method,
+    values_from = c(Length, TP)
+  )
+```
+
+```{r}
+pivot_summ1 = pivot_summ %>%
+  filter(heterogeneity == "With heterogeneity") %>%
+  select(-heterogeneity)
+```
+
+
+```{r}
+final_df <- pivot_summ1 %>%
+  select(
+    distribution, n, p, tau,
+    Length_COQCS, Length_AOCQS, Length_CQCS,
+    TP_COQCS, TP_AOCQS, TP_CQCS
+  ) %>%
+  arrange(distribution, n,p)
+```
+
+
+
+
+```{r}
+colnames(final_df) <- c(
+   "distribution", "n", "p", "tau",
+  "COQCS", "AOCQS", "CQCS",
+  "COQCS1", "AOCQS1", "CQCS1"
+)
+
+
+distribution_counts <- final_df %>%
+  group_by(distribution) %>%
+  summarise(count = n(), .groups = 'drop') %>%
+  pull(count)
+
+final_df_for_kbl <- final_df %>%
+  select(-distribution)
+
+colnames(final_df_for_kbl) <- c(
+   "n", "p", "tau",
+  "COQCS", "AOCQS", "CQCS",
+  "COQCS", "AOCQS", "CQCS"
+)
+
+final_df_for_kbl %>%
+  kbl(
+    format = "latex",
+    booktabs = TRUE,
+    digits = 2,
+    align = "cccrrrrrr",  
+    linesep = ""
+  ) %>%
+  add_header_above(
+    c(" " = 3, "Length" = 3, "TP" = 3),
+    escape = FALSE
+  ) %>%
+  pack_rows(
+    index = setNames(distribution_counts, paste(unique(final_df$distribution), " distribution")),
+    latex_align = "c"  
+  ) %>%
+  kable_styling(
+    latex_options = c("hold_position")
+  ) %>%
+  cat(file = "")
+```
+
+
